@@ -200,7 +200,7 @@ namespace Learnification
 			}
 			if (isDying == 1)
 			{
-				if (dieFrame <= 30)
+				if (dieFrame <= 15)
 				{
 					malPos.Y -= malSpeed;
 				}
