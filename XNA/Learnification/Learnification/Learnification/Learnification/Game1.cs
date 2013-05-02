@@ -132,7 +132,7 @@ namespace Learnification
                 this.Exit();
 
             // Logic for movement
-			if (keyboardState.IsKeyDown(Keys.Left) && isJumping == 0)
+			if (keyboardState.IsKeyDown(Keys.Left) && isJumping == 0 && isDying == 0)
             {
                 isRunning = 1;
 				isJumping = 0;
@@ -144,7 +144,7 @@ namespace Learnification
 
             }
 
-			if (keyboardState.IsKeyDown(Keys.Right) && isJumping == 0)
+			if (keyboardState.IsKeyDown(Keys.Right) && isJumping == 0 && isDying == 0)
             {
                 isRunning = 1;
 				isJumping = 0;
@@ -155,7 +155,7 @@ namespace Learnification
                     malPos.X = malMaxRight.X;
             }
 
-			if (keyboardState.IsKeyDown(Keys.A) && isJumping == 0)
+			if (keyboardState.IsKeyDown(Keys.A) && isJumping == 0 && isDying == 0)
 			{
 				isJumping = 1;
 				jumpFrame = 1;
