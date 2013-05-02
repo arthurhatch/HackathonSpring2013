@@ -36,6 +36,7 @@ namespace Learnification
 		Point enemySize = new Point(45, 52);
 		Point enemySheetSize = new Point(4,3);
 	    int moveEnemy = 1;
+	    int enemyDeadCount = 0;
 		Point currentEnemyFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
@@ -59,6 +60,7 @@ namespace Learnification
 		Direction direction = Direction.Right;
 
         float malSpeed = 3f;
+	    float enemeySpeed = 3f;
 
         public Game1()
         {
@@ -250,7 +252,7 @@ namespace Learnification
 
 		            if (enemyDirection == SpriteEffects.None)
 		            {
-			            enemyPos.X += malSpeed;
+						enemyPos.X += enemeySpeed;
 			            if (enemyPos.X > enemyMaxRight.X)
 			            {
 				            enemyPos.X = enemyMaxRight.X;
@@ -260,13 +262,24 @@ namespace Learnification
 		            }
 		            else
 		            {
-			            enemyPos.X -= malSpeed;
+						enemyPos.X -= enemeySpeed;
 			            if (enemyPos.X < 0)
 			            {
 				            enemyPos.X = 0;
 			            }
 		            }
 	            }
+	            else
+	            {
+		            enemyDeadCount++;
+	            }
+
+				if (enemyDeadCount > 10)
+				{
+					moveEnemy = 1;
+					enemyDeadCount = 0;
+					enemeySpeed += 2;
+				}
             }
 
             base.Update(gameTime);
