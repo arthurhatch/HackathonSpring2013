@@ -24,10 +24,18 @@ namespace Learnification
 
         Texture2D learningTexture;
         Texture2D learningSprite;
+	    Texture2D enemySprite;
         Texture2D background;
 
         Vector2 malPos = Vector2.Zero;
         Vector2 malMaxRight = Vector2.Zero;
+
+		SpriteEffects enemyDirection = SpriteEffects.None;
+		Vector2 enemyPos = Vector2.Zero;
+		Vector2 enemyMaxRight = Vector2.Zero;
+		Point enemySize = new Point(45, 52);
+		Point enemySheetSize = new Point(4,3);
+		Point currentEnemyFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
         Point currentFrame = new Point(0, 0);
@@ -71,10 +79,15 @@ namespace Learnification
             background = Content.Load<Texture2D>(@"Images/background2");
             learningTexture = Content.Load<Texture2D>(@"Images/mal_sprite_test1");
             learningSprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes");
+			enemySprite = Content.Load<Texture2D>(@"Images/Sprites/garfield");
 
             // Set up some defaults needed for default sprite locations / movement boundaries
             malPos = new Vector2(0, (Window.ClientBounds.Height - frameSize.Y));
             malMaxRight = new Vector2((Window.ClientBounds.Width - frameSize.X), 0);
+
+			// Set up enemy defaults
+			enemyPos = new Vector2((Window.ClientBounds.Width / 2), (Window.ClientBounds.Height - enemySize.Y));
+			enemyMaxRight = new Vector2((Window.ClientBounds.Width - enemySize.X), 0);
         }
 
         /// <summary>
@@ -155,6 +168,38 @@ namespace Learnification
                         }
                     }
                 }
+
+				// Move enemy
+				++currentEnemyFrame.X;
+				if (currentEnemyFrame.X >= enemySheetSize.X)
+				{
+					currentEnemyFrame.X = 0;
+					++currentEnemyFrame.Y;
+					if (currentEnemyFrame.Y >= 2)
+					{
+						currentEnemyFrame.Y = 0;
+					}
+				}
+
+				if (enemyDirection ==	SpriteEffects.None)
+				{
+					enemyPos.X += malSpeed;
+					if (enemyPos.X > enemyMaxRight.X)
+					{
+						enemyPos.X = enemyMaxRight.X;
+						enemyDirection = SpriteEffects.FlipHorizontally;
+					}
+						
+				}
+				else
+				{
+					enemyPos.X -= malSpeed;
+					if (enemyPos.X < 0)
+					{
+						enemyPos.X = 0;
+						enemyDirection = SpriteEffects.None;
+					}
+				}
             }
 
             base.Update(gameTime);
@@ -171,6 +216,8 @@ namespace Learnification
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
             spriteBatch.Draw(learningSprite, malPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, malDirection, 1);
+			spriteBatch.Draw(enemySprite, enemyPos, new Rectangle(currentEnemyFrame.X * enemySize.X, currentEnemyFrame.Y * enemySize.Y, enemySize.X, enemySize.Y), Color.White, 0, Vector2.Zero, 1, enemyDirection, 1);
+			
             spriteBatch.End();
 
             base.Draw(gameTime);
