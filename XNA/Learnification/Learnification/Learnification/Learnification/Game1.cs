@@ -35,6 +35,7 @@ namespace Learnification
 		Vector2 enemyMaxRight = Vector2.Zero;
 		Point enemySize = new Point(45, 52);
 		Point enemySheetSize = new Point(4,3);
+	    int moveEnemy = 1;
 		Point currentEnemyFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
@@ -178,6 +179,13 @@ namespace Learnification
 
 				jumpFrame++;
 
+				if (Math.Abs(malPos.X - enemyPos.X) < 10)
+				{
+					moveEnemy = 0;
+					currentEnemyFrame.X = 0;
+					currentEnemyFrame.Y = 2;
+				}
+
 				if (jumpFrame > 60)
 				{
 					jumpFrame = 0;
@@ -227,35 +235,38 @@ namespace Learnification
 				}
 	            
 				// Move enemy
-				++currentEnemyFrame.X;
-				if (currentEnemyFrame.X >= enemySheetSize.X)
-				{
-					currentEnemyFrame.X = 0;
-					++currentEnemyFrame.Y;
-					if (currentEnemyFrame.Y >= 2)
-					{
-						currentEnemyFrame.Y = 0;
-					}
-				}
+	            if (moveEnemy == 1)
+	            {
+		            ++currentEnemyFrame.X;
+		            if (currentEnemyFrame.X >= enemySheetSize.X)
+		            {
+			            currentEnemyFrame.X = 0;
+			            ++currentEnemyFrame.Y;
+			            if (currentEnemyFrame.Y >= 2)
+			            {
+				            currentEnemyFrame.Y = 0;
+			            }
+		            }
 
-				if (enemyDirection ==	SpriteEffects.None)
-				{
-					enemyPos.X += malSpeed;
-					if (enemyPos.X > enemyMaxRight.X)
-					{
-						enemyPos.X = enemyMaxRight.X;
-						enemyDirection = SpriteEffects.FlipHorizontally;
-					}
-						
-				}
-				else
-				{
-					enemyPos.X -= malSpeed;
-					if (enemyPos.X < 0)
-					{
-						enemyPos.X = 0;
-					}
-				}
+		            if (enemyDirection == SpriteEffects.None)
+		            {
+			            enemyPos.X += malSpeed;
+			            if (enemyPos.X > enemyMaxRight.X)
+			            {
+				            enemyPos.X = enemyMaxRight.X;
+				            enemyDirection = SpriteEffects.FlipHorizontally;
+			            }
+
+		            }
+		            else
+		            {
+			            enemyPos.X -= malSpeed;
+			            if (enemyPos.X < 0)
+			            {
+				            enemyPos.X = 0;
+			            }
+		            }
+	            }
             }
 
             base.Update(gameTime);
