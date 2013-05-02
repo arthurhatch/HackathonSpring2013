@@ -208,7 +208,6 @@ namespace Learnification
                         }
                     }
                 }
-<<<<<<< HEAD
 				else if (isJumping == 1)
 				{
 					currentFrame.Y = 1;
@@ -224,8 +223,9 @@ namespace Learnification
 					if (currentFrame.X >= sheetSize.X)
 					{
 						currentFrame.X = 0;
-=======
-
+					}
+				}
+	            
 				// Move enemy
 				++currentEnemyFrame.X;
 				if (currentEnemyFrame.X >= enemySheetSize.X)
@@ -254,8 +254,6 @@ namespace Learnification
 					if (enemyPos.X < 0)
 					{
 						enemyPos.X = 0;
-						enemyDirection = SpriteEffects.None;
->>>>>>> 8136ceed9ecd894ba42b4906b57d913f43da8643
 					}
 				}
             }
