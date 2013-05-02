@@ -46,6 +46,8 @@ namespace Learnification
         int isRunning = 0;
 		int isJumping = 0;
 	    int jumpFrame = 0;
+		int isDying = 0;
+		int dieFrame = 0;
 	    float jumpPower = 0.5f;
         int timeSinceLastFrame = 0;
         int millisecondsPerFrame = 125;
@@ -181,7 +183,7 @@ namespace Learnification
 
 				jumpFrame++;
 
-				if (Math.Abs(malPos.X - enemyPos.X) < 10)
+				if (this.CollisionDetected())
 				{
 					moveEnemy = 0;
 					currentEnemyFrame.X = 0;
@@ -195,6 +197,35 @@ namespace Learnification
 					malPos.Y = Window.ClientBounds.Height - frameSize.Y;
 					jumpPower = 0.5f;
 				}
+			}
+			if (isDying == 1)
+			{
+				if (dieFrame <= 30)
+				{
+					malPos.Y -= malSpeed;
+				}
+				else
+				{
+					malPos.Y += malSpeed;
+				}
+
+				dieFrame++;
+
+				if(dieFrame > 90)
+				{
+					jumpFrame = 0;
+					isJumping = 0;
+					isDying = 0;
+					dieFrame = 0;
+					malPos.Y = Window.ClientBounds.Height - frameSize.Y;
+					jumpPower = 0.5f;
+				}
+			}
+			else if (this.CollisionDetected())
+			{
+				isDying = 1;
+				currentFrame.Y = 1;
+				currentFrame.X = 1;
 			}
 
             if (timeSinceLastFrame > millisecondsPerFrame)
@@ -279,7 +310,7 @@ namespace Learnification
 				{
 					moveEnemy = 1;
 					enemyDeadCount = 0;
-					enemeySpeed += 2;
+					enemeySpeed += 8;
 				}
             }
 
@@ -303,5 +334,10 @@ namespace Learnification
 
             base.Draw(gameTime);
         }
+
+		private bool CollisionDetected()
+		{
+			return Math.Abs(malPos.X - enemyPos.X) < 10 && moveEnemy == 1;
+		}
     }
 }
