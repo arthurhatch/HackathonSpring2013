@@ -266,6 +266,7 @@ namespace Learnification
 			            if (enemyPos.X < 0)
 			            {
 				            enemyPos.X = 0;
+				            enemyDirection = SpriteEffects.None;
 			            }
 		            }
 	            }
