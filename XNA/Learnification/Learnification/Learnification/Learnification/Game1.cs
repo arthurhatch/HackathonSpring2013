@@ -34,9 +34,21 @@ namespace Learnification
         Point sheetSize = new Point(4, 6);
 
         int isRunning = 0;
+		int isJumping = 0;
+	    int jumpFrame = 0;
+	    float jumpPower = 0.5f;
         int timeSinceLastFrame = 0;
         int millisecondsPerFrame = 125;
-        
+	    float heightIncrement = 0;
+	    
+		enum Direction
+		{
+			Left = -1,
+			Right = 1,
+		}
+
+		Direction direction = Direction.Right;
+
         float malSpeed = 3f;
 
         public Game1()
@@ -102,9 +114,11 @@ namespace Learnification
                 this.Exit();
 
             // Logic for movement
-            if (keyboardState.IsKeyDown(Keys.Left))
+			if (keyboardState.IsKeyDown(Keys.Left) && isJumping == 0)
             {
                 isRunning = 1;
+				isJumping = 0;
+	            direction = Direction.Left;
                 malDirection = SpriteEffects.FlipHorizontally;
                 malPos.X -= malSpeed;
                 if (malPos.X < 0)
@@ -112,33 +126,59 @@ namespace Learnification
 
             }
 
-            if (keyboardState.IsKeyDown(Keys.Right))
+			if (keyboardState.IsKeyDown(Keys.Right) && isJumping == 0)
             {
                 isRunning = 1;
+				isJumping = 0;
+				direction = Direction.Right;
                 malDirection = SpriteEffects.None;
                 malPos.X += malSpeed;
                 if (malPos.X > malMaxRight.X)
                     malPos.X = malMaxRight.X;
             }
 
+			if (keyboardState.IsKeyDown(Keys.A) && isJumping == 0)
+			{
+				isJumping = 1;
+				jumpFrame = 1;
+				jumpPower = isRunning == 1 ? 1.0f : 0.6f;
+				malDirection = (int)direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+				//malPos.Y -= malSpeed;
+				//if (malPos.X > malMaxRight.X)
+					//malPos.X = malMaxRight.X;
+			}
+
+			if (isJumping == 1)
+			{
+				malPos.X += (int)direction * malSpeed * jumpPower;
+
+				heightIncrement = (float)(Math.Abs(30 - jumpFrame) / 18.0 * malSpeed) * jumpPower;
+
+				if (jumpFrame <= 30)
+				{
+					malPos.Y -= heightIncrement;
+				}
+				else
+				{
+					malPos.Y += heightIncrement;
+				}
+
+				jumpFrame++;
+
+				if (jumpFrame > 60)
+				{
+					jumpFrame = 0;
+					isJumping = 0;
+					malPos.Y = Window.ClientBounds.Height - frameSize.Y;
+					jumpPower = 0.5f;
+				}
+			}
+
             if (timeSinceLastFrame > millisecondsPerFrame)
             {
                 timeSinceLastFrame -= millisecondsPerFrame;
 
-                // Idle Animation Logic
-                if (isRunning == 0)
-                {
-                    if (currentFrame.Y > 0)
-                    {
-                        currentFrame.Y = 0;
-                    }
-                    ++currentFrame.X;
-                    if (currentFrame.X >= sheetSize.X)
-                    {
-                        currentFrame.X = 0;
-                    }
-                }
-                else
+				if (isRunning == 1 || jumpPower == 1.0f)
                 {
                     if (currentFrame.Y == 0)
                     {
@@ -155,6 +195,23 @@ namespace Learnification
                         }
                     }
                 }
+				else if (isJumping == 1)
+				{
+					currentFrame.Y = 1;
+					currentFrame.X = 1;
+				}
+				else // Idle Animation Logic
+				{
+					if (currentFrame.Y > 0)
+					{
+						currentFrame.Y = 0;
+					}
+					++currentFrame.X;
+					if (currentFrame.X >= sheetSize.X)
+					{
+						currentFrame.X = 0;
+					}
+				}
             }
 
             base.Update(gameTime);
