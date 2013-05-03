@@ -139,7 +139,7 @@ namespace Learnification
 			{
 				animateHeroJump();
 
-				if (this.CollisionDetected())
+				if (collisionDetected())
 				{
 					killEnemy();
 				}
@@ -148,7 +148,7 @@ namespace Learnification
 			{
 				animateHeroDeath();
 			}
-			else if (this.CollisionDetected())
+			else if (collisionDetected())
 			{
 				killHero();
 			}
@@ -207,7 +207,7 @@ namespace Learnification
             base.Draw(gameTime);
         }
 
-		private bool CollisionDetected()
+		private bool collisionDetected()
 		{
 			return Math.Abs(heroPos.X - enemyPos.X) < 10 && enemy.IsMoving == 1;
 		}
