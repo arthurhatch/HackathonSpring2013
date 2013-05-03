@@ -31,8 +31,7 @@ namespace Learnification
         int timeSinceLastFrame;
 
         const int millisecondsPerFrame = 125;
-	    
-	    
+	   
 		enum Direction
 		{
 			Left = -1,
@@ -40,9 +39,6 @@ namespace Learnification
 		}
 
 		Direction direction = Direction.Right;
-
-        const float malSpeed = 3f;
-	    float enemeySpeed = 3f;
 
         public Game1()
         {
@@ -70,7 +66,8 @@ namespace Learnification
 				Size = new Point(45, 52),
 				SheetSize = new Point(4, 3),
 				IsMoving = 1,
-				DeadCount = 0
+				DeadCount = 0,
+				Speed = 3f
 			};
 
 	        hero = new Hero
@@ -114,10 +111,9 @@ namespace Learnification
 				hero.IsJumping = 0;
 	            direction = Direction.Left;
                 malDirection = SpriteEffects.FlipHorizontally;
-                heroPos.X -= malSpeed;
+                heroPos.X -= hero.Speed;
                 if (heroPos.X < 0)
                     heroPos.X = 0;
-
             }
 
 			if (keyboardState.IsKeyDown(Keys.Right) && hero.IsJumping == 0 && hero.IsDying == 0)
@@ -126,7 +122,7 @@ namespace Learnification
 				hero.IsJumping = 0;
 				direction = Direction.Right;
                 malDirection = SpriteEffects.None;
-                heroPos.X += malSpeed;
+                heroPos.X += hero.Speed;
                 if (heroPos.X > hero.MaxRight.X)
                     heroPos.X = hero.MaxRight.X;
             }
@@ -141,64 +137,20 @@ namespace Learnification
 
 			if (hero.IsJumping == 1)
 			{
-				heroPos.X += (int)direction * malSpeed * hero.JumpPower;
-
-				heightIncrement = (float)(Math.Abs(30 - jumpFrame) / 18.0 * malSpeed) * hero.JumpPower;
-
-				if (jumpFrame <= 30)
-				{
-					heroPos.Y -= heightIncrement;
-				}
-				else
-				{
-					heroPos.Y += heightIncrement;
-				}
-
-				jumpFrame++;
+				animateHeroJump();
 
 				if (this.CollisionDetected())
 				{
-					enemy.IsMoving = 0;
-					enemyCurrentFrame.X = 0;
-					enemyCurrentFrame.Y = 2;
-				}
-
-				if (jumpFrame > 60)
-				{
-					jumpFrame = 0;
-					hero.IsJumping = 0;
-					heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
-					hero.JumpPower = 0.5f;
+					killEnemy();
 				}
 			}
 			if (hero.IsDying == 1)
 			{
-				if (dieFrame <= 15)
-				{
-					heroPos.Y -= malSpeed;
-				}
-				else
-				{
-					heroPos.Y += malSpeed;
-				}
-
-				dieFrame++;
-
-				if(dieFrame > 90)
-				{
-					jumpFrame = 0;
-					hero.IsJumping = 0;
-					hero.IsDying = 0;
-					dieFrame = 0;
-					heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
-					hero.JumpPower = 0.5f;
-				}
+				animateHeroDeath();
 			}
 			else if (this.CollisionDetected())
 			{
-				hero.IsDying = 1;
-				currentFrame.Y = 1;
-				currentFrame.X = 1;
+				killHero();
 			}
 
             if (timeSinceLastFrame > millisecondsPerFrame)
@@ -206,73 +158,22 @@ namespace Learnification
                 timeSinceLastFrame -= millisecondsPerFrame;
 
 				if (hero.IsRunning == 1 || hero.JumpPower == 1.0f)
-                {
-                    if (currentFrame.Y == 0)
-                    {
-                        currentFrame.Y = 1;
-                    }
-                    ++currentFrame.X;
-                    if (currentFrame.X >= sheetSize.X)
-                    {
-                        currentFrame.X = 0;
-                        ++currentFrame.Y;
-                        if (currentFrame.Y >= 3)
-                        {
-                            currentFrame.Y = 1;
-                        }
-                    }
-                }
+				{
+					animateHeroLongJump();
+				}
 				else if (hero.IsJumping == 1)
 				{
-					currentFrame.Y = 1;
-					currentFrame.X = 1;
+					animateHeroShortJump();
 				}
-				else // Idle Animation Logic
+				else
 				{
-					if (currentFrame.Y > 0)
-					{
-						currentFrame.Y = 0;
-					}
-					++currentFrame.X;
-					if (currentFrame.X >= sheetSize.X)
-					{
-						currentFrame.X = 0;
-					}
+					animateHeroIdle();
 				}
 	            
 				// Move enemy
 	            if (enemy.IsMoving == 1)
 	            {
-		            ++enemyCurrentFrame.X;
-		            if (enemyCurrentFrame.X >= enemy.SheetSize.X)
-		            {
-			            enemyCurrentFrame.X = 0;
-			            ++enemyCurrentFrame.Y;
-			            if (enemyCurrentFrame.Y >= 2)
-			            {
-				            enemyCurrentFrame.Y = 0;
-			            }
-		            }
-
-		            if (enemy.Direction == SpriteEffects.None)
-		            {
-						enemyPos.X += enemeySpeed;
-			            if (enemyPos.X > enemy.MaxRight.X)
-			            {
-				            enemyPos.X = enemy.MaxRight.X;
-				            enemy.Direction = SpriteEffects.FlipHorizontally;
-			            }
-
-		            }
-		            else
-		            {
-						enemyPos.X -= enemeySpeed;
-			            if (enemyPos.X < 0)
-			            {
-				            enemyPos.X = 0;
-				            enemy.Direction = SpriteEffects.None;
-			            }
-		            }
+		            moveEnemy();
 	            }
 	            else
 	            {
@@ -281,9 +182,7 @@ namespace Learnification
 
 				if (enemy.DeadCount > 10)
 				{
-					enemy.IsMoving = 1;
-					enemy.DeadCount = 0;
-					enemeySpeed += 8;
+					reviveEnemy();
 				}
             }
 
@@ -311,6 +210,135 @@ namespace Learnification
 		private bool CollisionDetected()
 		{
 			return Math.Abs(heroPos.X - enemyPos.X) < 10 && enemy.IsMoving == 1;
+		}
+
+		private void killHero()
+		{
+			hero.IsDying = 1;
+			currentFrame.Y = 1;
+			currentFrame.X = 1;
+		}
+
+		private void killEnemy()
+		{
+			enemy.IsMoving = 0;
+			enemyCurrentFrame.X = 0;
+			enemyCurrentFrame.Y = 2;
+		}
+
+		private void reviveEnemy()
+		{
+			enemy.IsMoving = 1;
+			enemy.DeadCount = 0;
+			enemy.Speed += 8;
+		}
+
+		private void animateHeroDeath()
+		{
+			heroPos.Y = (dieFrame <= 15) ? heroPos.Y + -1 * hero.Speed : heroPos.Y + hero.Speed;
+
+			dieFrame++;
+
+			if (dieFrame > 90)
+			{
+				jumpFrame = 0;
+				hero.IsJumping = 0;
+				hero.IsDying = 0;
+				dieFrame = 0;
+				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
+				hero.JumpPower = 0.5f;
+			}
+		}
+
+		private void animateHeroJump()
+		{
+			heroPos.X += (int)direction * hero.Speed * hero.JumpPower;
+
+			heightIncrement = (float)(Math.Abs(30 - jumpFrame) / 18.0 * hero.Speed) * hero.JumpPower;
+
+			heroPos.Y = (jumpFrame <= 30) ? heroPos.Y + -1 * heightIncrement : heroPos.Y + heightIncrement;
+
+			jumpFrame++;
+
+			if (jumpFrame > 60)
+			{
+				jumpFrame = 0;
+				hero.IsJumping = 0;
+				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
+				hero.JumpPower = 0.5f;
+			}
+		}
+
+		private void animateHeroLongJump()
+		{
+			if (currentFrame.Y == 0)
+			{
+				currentFrame.Y = 1;
+			}
+			++currentFrame.X;
+
+			if (currentFrame.X >= sheetSize.X)
+			{
+				currentFrame.X = 0;
+				++currentFrame.Y;
+				if (currentFrame.Y >= 3)
+				{
+					currentFrame.Y = 1;
+				}
+			}
+		}
+
+		private void animateHeroShortJump()
+		{
+			currentFrame.Y = 1;
+			currentFrame.X = 1;
+		}
+
+		private void animateHeroIdle()
+		{
+			if (currentFrame.Y > 0)
+			{
+				currentFrame.Y = 0;
+			}
+			++currentFrame.X;
+
+			if (currentFrame.X >= sheetSize.X)
+			{
+				currentFrame.X = 0;
+			}
+		}
+
+		private void moveEnemy()
+		{
+			++enemyCurrentFrame.X;
+		    if (enemyCurrentFrame.X >= enemy.SheetSize.X)
+		    {
+			    enemyCurrentFrame.X = 0;
+			    ++enemyCurrentFrame.Y;
+			    if (enemyCurrentFrame.Y >= 2)
+			    {
+				    enemyCurrentFrame.Y = 0;
+			    }
+		    }
+
+		    if (enemy.Direction == SpriteEffects.None)
+		    {
+				enemyPos.X += enemy.Speed;
+			    if (enemyPos.X > enemy.MaxRight.X)
+			    {
+				    enemyPos.X = enemy.MaxRight.X;
+				    enemy.Direction = SpriteEffects.FlipHorizontally;
+			    }
+		    }
+		    else
+		    {
+				enemyPos.X -= enemy.Speed;
+			    if (enemyPos.X < 0)
+			    {
+				    enemyPos.X = 0;
+				    enemy.Direction = SpriteEffects.None;
+			    }
+		    }
 		}
     }
 }

@@ -12,5 +12,6 @@ namespace Learnification
 		public Point SheetSize { get; set; }
 		public int IsMoving { get; set; }
 		public int DeadCount { get; set; }
+		public float Speed { get; set; }
 	}
 }
