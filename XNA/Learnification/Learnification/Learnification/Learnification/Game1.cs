@@ -19,11 +19,10 @@ namespace Learnification
 
         Vector2 heroPos = Vector2.Zero;
 		Vector2 enemyPos = Vector2.Zero;
-		Vector2 rockPos = Vector2.Zero;
+		Vector2 rockPos = new Vector2(-16, -16);
 
 		Point enemyFrame = new Point(0, 0);
 		Point heroFrame = new Point(0, 0);
-		Point rockFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
         Point sheetSize = new Point(4, 6);
@@ -68,7 +67,7 @@ namespace Learnification
 				DeadCount = 0,
 				Speed = 5f,
 				MaxSpeed = 20f,
-				ChaseSmart = false
+				ChaseSmart = false,
 			};
 
 	        hero = new Hero
@@ -79,14 +78,16 @@ namespace Learnification
 		        IsDying = 0,
 		        JumpPower = 0.5f,
 		        MaxRight = Vector2.Zero,
-				Direction = SpriteEffects.None
+				Direction = SpriteEffects.None,
 	        };
 
 	        rock = new Rock
 	        {
 		        Sprite = Content.Load<Texture2D>(@"Images/rock"),
 				Size = new Point(16, 16),
-				Direction = SpriteEffects.None
+				Direction = SpriteEffects.None,
+				IsAirborn = false,
+				IsFalling = false,
 	        };
 
             // Set up some defaults needed for default sprite locations / movement boundaries
@@ -194,6 +195,19 @@ namespace Learnification
 				{
 					reviveEnemy();
 				}
+
+				if (rock.IsAirborn)
+				{
+					animateRockThrow();
+					
+					if (detectRockCollision())
+					{
+						killHero();
+						rock.IsAirborn = false;
+						rockPos.X = -16;
+						rockPos.Y = -16;
+					}
+				}
             }
 
             base.Update(gameTime);
@@ -211,13 +225,21 @@ namespace Learnification
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
             spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(heroFrame.X * frameSize.X, heroFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
 			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
-			spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(rockFrame.X * rock.Size.X, rockFrame.Y * rock.Size.Y, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
+			spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
 
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
+		private bool detectRockCollision()
+		{
+			var xEquivilance = Math.Abs(heroPos.X - rockPos.X) < 20;
+			var yEquivalance = Math.Abs(heroPos.Y - rockPos.Y) < 20;
+
+			return xEquivilance && yEquivalance;
+		}
+		
 		private bool collisionDetected()
 		{
 			if (enemy.IsMoving == 0)
@@ -265,7 +287,7 @@ namespace Learnification
 				enemy.ChaseSmart = true;
 			}
 
-			rockPos.X += 50;
+			throwRock();
 		}
 
 		private void animateHeroDeath()
@@ -284,6 +306,28 @@ namespace Learnification
 				jumpFrame = 0;
 				dieFrame = 0;
 			}
+		}
+
+		private void throwRock()
+		{
+			rockPos.X = enemyPos.X;
+			rockPos.Y = enemyPos.Y;
+			rock.ThrowMultiplier = (enemyPos.X - heroPos.X > 0) ? -1 : 1;
+			rock.IsAirborn = true;
+			rock.IsFalling = false;
+		}
+
+	    private void animateRockThrow()
+	    {
+		    rockPos.X += rock.ThrowMultiplier * 10;
+			rockPos.Y += rock.IsFalling ? 8 : -8;
+
+		    if (!rock.IsFalling)
+		    {
+				rock.IsFalling = !rock.IsFalling && rockPos.Y < 370;
+		    }
+
+		    rock.IsAirborn = rockPos.Y < Window.ClientBounds.Height;
 		}
 
 		private void animateHeroJump()
