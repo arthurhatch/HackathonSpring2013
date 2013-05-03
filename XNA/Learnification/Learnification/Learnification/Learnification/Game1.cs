@@ -19,10 +19,12 @@ namespace Learnification
 
         Vector2 heroPos = Vector2.Zero;
 		Vector2 enemyPos = Vector2.Zero;
-		Point enemyCurrentFrame = new Point(0, 0);
+		Vector2 rockPos = Vector2.Zero;
+
+		Point enemyFrame = new Point(0, 0);
+		Point heroFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
-        Point currentFrame = new Point(0, 0);
         Point sheetSize = new Point(4, 6);
 
 		int jumpFrame;
@@ -204,9 +206,9 @@ namespace Learnification
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
-            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
-			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyCurrentFrame.X * enemy.Size.X, enemyCurrentFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
-			//spriteBatch.Draw(rock.Sprite, enemyPos, new Rectangle(enemyCurrentFrame.X * enemy.Size.X, enemyCurrentFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(heroFrame.X * frameSize.X, heroFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
+			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+			spriteBatch.Draw(rock.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
 
             spriteBatch.End();
 
@@ -235,15 +237,15 @@ namespace Learnification
 		private void killHero()
 		{
 			hero.IsDying = 1;
-			currentFrame.Y = 1;
-			currentFrame.X = 1;
+			heroFrame.Y = 1;
+			heroFrame.X = 1;
 		}
 
 		private void killEnemy()
 		{
 			enemy.IsMoving = 0;
-			enemyCurrentFrame.X = 0;
-			enemyCurrentFrame.Y = 2;
+			enemyFrame.X = 0;
+			enemyFrame.Y = 2;
 		}
 
 		private void reviveEnemy()
@@ -317,53 +319,53 @@ namespace Learnification
 
 		private void animateHeroLongJump()
 		{
-			if (currentFrame.Y == 0)
+			if (heroFrame.Y == 0)
 			{
-				currentFrame.Y = 1;
+				heroFrame.Y = 1;
 			}
-			++currentFrame.X;
+			++heroFrame.X;
 
-			if (currentFrame.X >= sheetSize.X)
+			if (heroFrame.X >= sheetSize.X)
 			{
-				currentFrame.X = 0;
-				++currentFrame.Y;
-				if (currentFrame.Y >= 3)
+				heroFrame.X = 0;
+				++heroFrame.Y;
+				if (heroFrame.Y >= 3)
 				{
-					currentFrame.Y = 1;
+					heroFrame.Y = 1;
 				}
 			}
 		}
 
 		private void animateHeroShortJump()
 		{
-			currentFrame.Y = 1;
-			currentFrame.X = 1;
+			heroFrame.Y = 1;
+			heroFrame.X = 1;
 		}
 
 		private void animateHeroIdle()
 		{
-			if (currentFrame.Y > 0)
+			if (heroFrame.Y > 0)
 			{
-				currentFrame.Y = 0;
+				heroFrame.Y = 0;
 			}
-			++currentFrame.X;
+			++heroFrame.X;
 
-			if (currentFrame.X >= sheetSize.X)
+			if (heroFrame.X >= sheetSize.X)
 			{
-				currentFrame.X = 0;
+				heroFrame.X = 0;
 			}
 		}
 
 		private void moveEnemy()
 		{
-			++enemyCurrentFrame.X;
-		    if (enemyCurrentFrame.X >= enemy.SheetSize.X)
+			++enemyFrame.X;
+		    if (enemyFrame.X >= enemy.SheetSize.X)
 		    {
-			    enemyCurrentFrame.X = 0;
-			    ++enemyCurrentFrame.Y;
-			    if (enemyCurrentFrame.Y >= 2)
+			    enemyFrame.X = 0;
+			    ++enemyFrame.Y;
+			    if (enemyFrame.Y >= 2)
 			    {
-				    enemyCurrentFrame.Y = 0;
+				    enemyFrame.Y = 0;
 			    }
 		    }
 
