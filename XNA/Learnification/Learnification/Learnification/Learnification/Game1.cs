@@ -1,20 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 
 namespace Learnification
 {
-    /// <summary>
-    /// This is the main type for your game
-    /// </summary>
-    public class Game1 : Microsoft.Xna.Framework.Game
+    public class Game1 : Game
     {
         // BEGIN GAME LOL
         GraphicsDeviceManager graphics;
@@ -22,7 +13,6 @@ namespace Learnification
         SpriteEffects malDirection = SpriteEffects.None;
         SpriteBatch spriteBatch;
 
-        Texture2D learningTexture;
         Texture2D learningSprite;
 	    Texture2D background;
 
@@ -45,7 +35,7 @@ namespace Learnification
 		int dieFrame = 0;
 	    float jumpPower = 0.5f;
         int timeSinceLastFrame = 0;
-        int millisecondsPerFrame = 125;
+        const int millisecondsPerFrame = 125;
 	    float heightIncrement = 0;
 	    
 		enum Direction
@@ -56,26 +46,13 @@ namespace Learnification
 
 		Direction direction = Direction.Right;
 
-        float malSpeed = 3f;
+        const float malSpeed = 3f;
 	    float enemeySpeed = 3f;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-        }
-
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
-        protected override void Initialize()
-        {
-            // TODO: Add your initialization logic here
-
-            base.Initialize();
         }
 
         /// <summary>
@@ -89,7 +66,6 @@ namespace Learnification
 
             // Load the images for our game into our ContentManager / Memory
             background = Content.Load<Texture2D>(@"Images/background2");
-            learningTexture = Content.Load<Texture2D>(@"Images/mal_sprite_test1");
             learningSprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes");
 	       
 			enemy = new Enemy
@@ -113,15 +89,6 @@ namespace Learnification
         }
 
         /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
-        }
-
-        /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
@@ -132,7 +99,7 @@ namespace Learnification
             isRunning = 0;
 
             // Allows the game to exit
-            KeyboardState keyboardState = Keyboard.GetState();
+            var keyboardState = Keyboard.GetState();
             if (keyboardState.IsKeyDown(Keys.Escape))
                 this.Exit();
 
@@ -166,9 +133,6 @@ namespace Learnification
 				jumpFrame = 1;
 				jumpPower = isRunning == 1 ? 1.0f : 0.6f;
 				malDirection = (int)direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-				//malPos.Y -= malSpeed;
-				//if (malPos.X > malMaxRight.X)
-					//malPos.X = malMaxRight.X;
 			}
 
 			if (isJumping == 1)
