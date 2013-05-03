@@ -52,7 +52,7 @@ namespace Learnification
 
             // Load the images for our game into our ContentManager / Memory
             background = Content.Load<Texture2D>(@"Images/background2");
-	       
+
 			enemy = new Enemy
 			{
 				Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield"),
@@ -208,7 +208,21 @@ namespace Learnification
 
 		private bool collisionDetected()
 		{
-			return Math.Abs(heroPos.X - enemyPos.X) < 10 && enemy.IsMoving == 1;
+			if (enemy.IsMoving == 0)
+			{
+				return false;
+			}
+
+			var xEquivilance = Math.Abs(heroPos.X - enemyPos.X) < 10;
+
+			if (hero.IsJumping == 0)
+			{
+				return xEquivilance;
+			}
+
+			var yEquivalance = Math.Abs(Window.ClientBounds.Height - heroPos.Y - enemy.Size.Y) < 25;
+
+			return xEquivilance && yEquivalance;
 		}
 
 		private void killHero()
