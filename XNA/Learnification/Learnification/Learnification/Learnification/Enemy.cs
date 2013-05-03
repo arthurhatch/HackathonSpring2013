@@ -13,5 +13,7 @@ namespace Learnification
 		public int IsMoving { get; set; }
 		public int DeadCount { get; set; }
 		public float Speed { get; set; }
+		public float MaxSpeed { get; set; }
+		public bool ChaseSmart { get; set; }
 	}
 }

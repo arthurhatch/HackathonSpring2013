@@ -31,11 +31,7 @@ namespace Learnification
 
         const int millisecondsPerFrame = 125;
 	   
-		enum Direction
-		{
-			Left = -1,
-			Right = 1,
-		}
+		enum Direction { Left = -1, Right = 1 }
 
 		Direction direction = Direction.Right;
 
@@ -66,7 +62,9 @@ namespace Learnification
 				SheetSize = new Point(4, 3),
 				IsMoving = 1,
 				DeadCount = 0,
-				Speed = 3f
+				Speed = 5f,
+				MaxSpeed = 20f,
+				ChaseSmart = false
 			};
 
 	        hero = new Hero
@@ -144,6 +142,7 @@ namespace Learnification
 					killEnemy();
 				}
 			}
+
 			if (hero.IsDying == 1)
 			{
 				animateHeroDeath();
@@ -230,7 +229,15 @@ namespace Learnification
 		{
 			enemy.IsMoving = 1;
 			enemy.DeadCount = 0;
-			enemy.Speed += 8;
+
+			if (enemy.Speed <= enemy.MaxSpeed)
+			{
+				enemy.Speed += 5;
+			}
+			else
+			{
+				enemy.ChaseSmart = true;
+			}
 		}
 
 		private void animateHeroDeath()
@@ -241,12 +248,13 @@ namespace Learnification
 
 			if (dieFrame > 90)
 			{
-				jumpFrame = 0;
 				hero.IsJumping = 0;
 				hero.IsDying = 0;
-				dieFrame = 0;
-				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
 				hero.JumpPower = 0.5f;
+				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
+				
+				jumpFrame = 0;
+				dieFrame = 0;
 			}
 		}
 
@@ -266,6 +274,23 @@ namespace Learnification
 				hero.IsJumping = 0;
 				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
 				hero.JumpPower = 0.5f;
+
+				setEnemyDirection();
+			}
+		}
+
+		private void setEnemyDirection()
+		{
+			if (enemy.ChaseSmart)
+			{
+				if (enemy.Direction == SpriteEffects.None && enemyPos.X - heroPos.X > 0)
+				{
+					enemy.Direction = SpriteEffects.FlipHorizontally;
+				}
+				else if (enemy.Direction == SpriteEffects.FlipHorizontally && enemyPos.X - heroPos.X < 0)
+				{
+					enemy.Direction = SpriteEffects.None;
+				}
 			}
 		}
 
