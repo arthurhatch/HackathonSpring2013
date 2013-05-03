@@ -23,6 +23,7 @@ namespace Learnification
 
 		Point enemyFrame = new Point(0, 0);
 		Point heroFrame = new Point(0, 0);
+		Point rockFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
         Point sheetSize = new Point(4, 6);
@@ -84,6 +85,8 @@ namespace Learnification
 	        rock = new Rock
 	        {
 		        Sprite = Content.Load<Texture2D>(@"Images/rock"),
+				Size = new Point(16, 16),
+				Direction = SpriteEffects.None
 	        };
 
             // Set up some defaults needed for default sprite locations / movement boundaries
@@ -208,7 +211,7 @@ namespace Learnification
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
             spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(heroFrame.X * frameSize.X, heroFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
 			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
-			spriteBatch.Draw(rock.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+			spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(rockFrame.X * rock.Size.X, rockFrame.Y * rock.Size.Y, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
 
             spriteBatch.End();
 
@@ -261,6 +264,8 @@ namespace Learnification
 			{
 				enemy.ChaseSmart = true;
 			}
+
+			rockPos.X += 50;
 		}
 
 		private void animateHeroDeath()
