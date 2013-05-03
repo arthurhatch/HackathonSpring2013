@@ -27,6 +27,8 @@ namespace Learnification
         Point frameSize = new Point(38, 41);
         Point sheetSize = new Point(4, 6);
 
+		SpriteFont font;
+
 		int jumpFrame;
 		int dieFrame;
 	    float heightIncrement;
@@ -65,6 +67,7 @@ namespace Learnification
 				SheetSize = new Point(4, 3),
 				IsMoving = 1,
 				DeadCount = 0,
+				Health = 100,
 				Speed = 5f,
 				MaxSpeed = 20f,
 				ChaseSmart = false,
@@ -89,6 +92,8 @@ namespace Learnification
 				IsAirborn = false,
 				IsFalling = false,
 	        };
+
+			font = Content.Load<SpriteFont>("gameFont");
 
             // Set up some defaults needed for default sprite locations / movement boundaries
             heroPos = new Vector2(0, (Window.ClientBounds.Height - frameSize.Y));
@@ -151,6 +156,14 @@ namespace Learnification
 
 				if (collisionDetected())
 				{
+					if (enemy.Health - 12 <= 0)
+					{
+						enemy.Health = 0;
+					}
+					else
+					{
+						enemy.Health = enemy.Health - 12;
+					}
 					killEnemy();
 				}
 			}
@@ -221,11 +234,16 @@ namespace Learnification
         {
             GraphicsDevice.Clear(Color.White);
 
-            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
             spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(heroFrame.X * frameSize.X, heroFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
 			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+<<<<<<< HEAD
 			spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
+=======
+			spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(rockFrame.X * rock.Size.X, rockFrame.Y * rock.Size.Y, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
+			spriteBatch.DrawString(font, "Enemy Health:" + enemy.Health + "%", new Vector2(20, 45), Color.Yellow);
+>>>>>>> 6070a042a1f09d6c3e287ebb145eaca722176d7b
 
             spriteBatch.End();
 
