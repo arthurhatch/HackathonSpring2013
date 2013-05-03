@@ -13,6 +13,7 @@ namespace Learnification
 		public int IsDying { get; set; }
 		public float JumpPower { get; set; }
 		public Vector2 MaxRight { get; set; }
+		public SpriteEffects Direction { get; set; }
 		public float Speed {
 			get
 			{

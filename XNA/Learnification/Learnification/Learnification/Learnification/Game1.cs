@@ -10,7 +10,6 @@ namespace Learnification
         // BEGIN GAME LOL
         GraphicsDeviceManager graphics;
 
-        SpriteEffects malDirection = SpriteEffects.None;
         SpriteBatch spriteBatch;
 	    Texture2D background;
 
@@ -77,7 +76,8 @@ namespace Learnification
 		        IsJumping = 0,
 		        IsDying = 0,
 		        JumpPower = 0.5f,
-		        MaxRight = Vector2.Zero
+		        MaxRight = Vector2.Zero,
+				Direction = SpriteEffects.None
 	        };
 
             // Set up some defaults needed for default sprite locations / movement boundaries
@@ -110,7 +110,7 @@ namespace Learnification
                 hero.IsRunning = 1;
 				hero.IsJumping = 0;
 	            direction = Direction.Left;
-                malDirection = SpriteEffects.FlipHorizontally;
+                hero.Direction = SpriteEffects.FlipHorizontally;
                 heroPos.X -= hero.Speed;
                 if (heroPos.X < 0)
                     heroPos.X = 0;
@@ -121,7 +121,7 @@ namespace Learnification
                 hero.IsRunning = 1;
 				hero.IsJumping = 0;
 				direction = Direction.Right;
-                malDirection = SpriteEffects.None;
+                hero.Direction = SpriteEffects.None;
                 heroPos.X += hero.Speed;
                 if (heroPos.X > hero.MaxRight.X)
                     heroPos.X = hero.MaxRight.X;
@@ -132,7 +132,7 @@ namespace Learnification
 				hero.IsJumping = 1;
 				jumpFrame = 1;
 				hero.JumpPower = hero.IsRunning == 1 ? 1.0f : 0.6f;
-				malDirection = (int)direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+				hero.Direction = (int)direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 			}
 
 			if (hero.IsJumping == 1)
@@ -199,7 +199,7 @@ namespace Learnification
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
-            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, malDirection, 1);
+            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
 			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyCurrentFrame.X * enemy.Size.X, enemyCurrentFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
 			
             spriteBatch.End();
