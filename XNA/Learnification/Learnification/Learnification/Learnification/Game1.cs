@@ -15,6 +15,7 @@ namespace Learnification
 
 		Enemy enemy;
 	    Hero hero;
+		Rock rock;
 
         Vector2 heroPos = Vector2.Zero;
 		Vector2 enemyPos = Vector2.Zero;
@@ -76,6 +77,11 @@ namespace Learnification
 		        JumpPower = 0.5f,
 		        MaxRight = Vector2.Zero,
 				Direction = SpriteEffects.None
+	        };
+
+	        rock = new Rock
+	        {
+		        Sprite = Content.Load<Texture2D>(@"Images/rock"),
 	        };
 
             // Set up some defaults needed for default sprite locations / movement boundaries
@@ -200,7 +206,8 @@ namespace Learnification
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
             spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
 			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyCurrentFrame.X * enemy.Size.X, enemyCurrentFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
-			
+			//spriteBatch.Draw(rock.Sprite, enemyPos, new Rectangle(enemyCurrentFrame.X * enemy.Size.X, enemyCurrentFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
