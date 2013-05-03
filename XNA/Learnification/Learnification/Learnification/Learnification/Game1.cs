@@ -12,15 +12,12 @@ namespace Learnification
 
         SpriteEffects malDirection = SpriteEffects.None;
         SpriteBatch spriteBatch;
-
-        Texture2D learningSprite;
 	    Texture2D background;
 
 		Enemy enemy;
+	    Hero hero;
 
-        Vector2 malPos = Vector2.Zero;
-        Vector2 malMaxRight = Vector2.Zero;
-
+        Vector2 heroPos = Vector2.Zero;
 		Vector2 enemyPos = Vector2.Zero;
 		Point enemyCurrentFrame = new Point(0, 0);
 
@@ -28,15 +25,13 @@ namespace Learnification
         Point currentFrame = new Point(0, 0);
         Point sheetSize = new Point(4, 6);
 
-        int isRunning = 0;
-		int isJumping = 0;
-	    int jumpFrame = 0;
-		int isDying = 0;
-		int dieFrame = 0;
-	    float jumpPower = 0.5f;
-        int timeSinceLastFrame = 0;
+		int jumpFrame;
+		int dieFrame;
+	    float heightIncrement;
+        int timeSinceLastFrame;
+
         const int millisecondsPerFrame = 125;
-	    float heightIncrement = 0;
+	    
 	    
 		enum Direction
 		{
@@ -66,22 +61,31 @@ namespace Learnification
 
             // Load the images for our game into our ContentManager / Memory
             background = Content.Load<Texture2D>(@"Images/background2");
-            learningSprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes");
 	       
 			enemy = new Enemy
-				{
-					Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield"),
-					Direction = SpriteEffects.None,
-					MaxRight = Vector2.Zero,
-					Size = new Point(45, 52),
-					SheetSize = new Point(4, 3),
-					IsMoving = 1,
-					DeadCount = 0
-				};
+			{
+				Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield"),
+				Direction = SpriteEffects.None,
+				MaxRight = Vector2.Zero,
+				Size = new Point(45, 52),
+				SheetSize = new Point(4, 3),
+				IsMoving = 1,
+				DeadCount = 0
+			};
+
+	        hero = new Hero
+	        {
+		        Sprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes"),
+		        IsRunning = 0,
+		        IsJumping = 0,
+		        IsDying = 0,
+		        JumpPower = 0.5f,
+		        MaxRight = Vector2.Zero
+	        };
 
             // Set up some defaults needed for default sprite locations / movement boundaries
-            malPos = new Vector2(0, (Window.ClientBounds.Height - frameSize.Y));
-            malMaxRight = new Vector2((Window.ClientBounds.Width - frameSize.X), 0);
+            heroPos = new Vector2(0, (Window.ClientBounds.Height - frameSize.Y));
+            hero.MaxRight = new Vector2((Window.ClientBounds.Width - frameSize.X), 0);
 
 			// Set up enemy defaults
 			enemyPos = new Vector2((Window.ClientBounds.Width / 2), (Window.ClientBounds.Height - enemy.Size.Y));
@@ -96,7 +100,7 @@ namespace Learnification
         protected override void Update(GameTime gameTime)
         {
             timeSinceLastFrame += gameTime.ElapsedGameTime.Milliseconds;
-            isRunning = 0;
+            hero.IsRunning = 0;
 
             // Allows the game to exit
             var keyboardState = Keyboard.GetState();
@@ -104,50 +108,50 @@ namespace Learnification
                 this.Exit();
 
             // Logic for movement
-			if (keyboardState.IsKeyDown(Keys.Left) && isJumping == 0 && isDying == 0)
+			if (keyboardState.IsKeyDown(Keys.Left) && hero.IsJumping == 0 && hero.IsDying == 0)
             {
-                isRunning = 1;
-				isJumping = 0;
+                hero.IsRunning = 1;
+				hero.IsJumping = 0;
 	            direction = Direction.Left;
                 malDirection = SpriteEffects.FlipHorizontally;
-                malPos.X -= malSpeed;
-                if (malPos.X < 0)
-                    malPos.X = 0;
+                heroPos.X -= malSpeed;
+                if (heroPos.X < 0)
+                    heroPos.X = 0;
 
             }
 
-			if (keyboardState.IsKeyDown(Keys.Right) && isJumping == 0 && isDying == 0)
+			if (keyboardState.IsKeyDown(Keys.Right) && hero.IsJumping == 0 && hero.IsDying == 0)
             {
-                isRunning = 1;
-				isJumping = 0;
+                hero.IsRunning = 1;
+				hero.IsJumping = 0;
 				direction = Direction.Right;
                 malDirection = SpriteEffects.None;
-                malPos.X += malSpeed;
-                if (malPos.X > malMaxRight.X)
-                    malPos.X = malMaxRight.X;
+                heroPos.X += malSpeed;
+                if (heroPos.X > hero.MaxRight.X)
+                    heroPos.X = hero.MaxRight.X;
             }
 
-			if (keyboardState.IsKeyDown(Keys.A) && isJumping == 0 && isDying == 0)
+			if (keyboardState.IsKeyDown(Keys.A) && hero.IsJumping == 0 && hero.IsDying == 0)
 			{
-				isJumping = 1;
+				hero.IsJumping = 1;
 				jumpFrame = 1;
-				jumpPower = isRunning == 1 ? 1.0f : 0.6f;
+				hero.JumpPower = hero.IsRunning == 1 ? 1.0f : 0.6f;
 				malDirection = (int)direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 			}
 
-			if (isJumping == 1)
+			if (hero.IsJumping == 1)
 			{
-				malPos.X += (int)direction * malSpeed * jumpPower;
+				heroPos.X += (int)direction * malSpeed * hero.JumpPower;
 
-				heightIncrement = (float)(Math.Abs(30 - jumpFrame) / 18.0 * malSpeed) * jumpPower;
+				heightIncrement = (float)(Math.Abs(30 - jumpFrame) / 18.0 * malSpeed) * hero.JumpPower;
 
 				if (jumpFrame <= 30)
 				{
-					malPos.Y -= heightIncrement;
+					heroPos.Y -= heightIncrement;
 				}
 				else
 				{
-					malPos.Y += heightIncrement;
+					heroPos.Y += heightIncrement;
 				}
 
 				jumpFrame++;
@@ -162,20 +166,20 @@ namespace Learnification
 				if (jumpFrame > 60)
 				{
 					jumpFrame = 0;
-					isJumping = 0;
-					malPos.Y = Window.ClientBounds.Height - frameSize.Y;
-					jumpPower = 0.5f;
+					hero.IsJumping = 0;
+					heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
+					hero.JumpPower = 0.5f;
 				}
 			}
-			if (isDying == 1)
+			if (hero.IsDying == 1)
 			{
 				if (dieFrame <= 15)
 				{
-					malPos.Y -= malSpeed;
+					heroPos.Y -= malSpeed;
 				}
 				else
 				{
-					malPos.Y += malSpeed;
+					heroPos.Y += malSpeed;
 				}
 
 				dieFrame++;
@@ -183,16 +187,16 @@ namespace Learnification
 				if(dieFrame > 90)
 				{
 					jumpFrame = 0;
-					isJumping = 0;
-					isDying = 0;
+					hero.IsJumping = 0;
+					hero.IsDying = 0;
 					dieFrame = 0;
-					malPos.Y = Window.ClientBounds.Height - frameSize.Y;
-					jumpPower = 0.5f;
+					heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
+					hero.JumpPower = 0.5f;
 				}
 			}
 			else if (this.CollisionDetected())
 			{
-				isDying = 1;
+				hero.IsDying = 1;
 				currentFrame.Y = 1;
 				currentFrame.X = 1;
 			}
@@ -201,7 +205,7 @@ namespace Learnification
             {
                 timeSinceLastFrame -= millisecondsPerFrame;
 
-				if (isRunning == 1 || jumpPower == 1.0f)
+				if (hero.IsRunning == 1 || hero.JumpPower == 1.0f)
                 {
                     if (currentFrame.Y == 0)
                     {
@@ -218,7 +222,7 @@ namespace Learnification
                         }
                     }
                 }
-				else if (isJumping == 1)
+				else if (hero.IsJumping == 1)
 				{
 					currentFrame.Y = 1;
 					currentFrame.X = 1;
@@ -296,7 +300,7 @@ namespace Learnification
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
-            spriteBatch.Draw(learningSprite, malPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, malDirection, 1);
+            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(currentFrame.X * frameSize.X, currentFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, malDirection, 1);
 			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyCurrentFrame.X * enemy.Size.X, enemyCurrentFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
 			
             spriteBatch.End();
@@ -306,7 +310,7 @@ namespace Learnification
 
 		private bool CollisionDetected()
 		{
-			return Math.Abs(malPos.X - enemyPos.X) < 10 && enemy.IsMoving == 1;
+			return Math.Abs(heroPos.X - enemyPos.X) < 10 && enemy.IsMoving == 1;
 		}
     }
 }
