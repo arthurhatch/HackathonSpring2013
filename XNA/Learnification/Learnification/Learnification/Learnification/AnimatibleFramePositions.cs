@@ -21,5 +21,20 @@
                 }
             }
         }
+
+        public void GeneratePoints(int xMin, int xMax, int yMin, int yMax)
+        {
+            var length = (xMax - xMin + 1) * (yMin - yMax + 1);
+            Points = new Point[length];
+            var index = 0;
+
+            for (int j = yMin; j <= yMax; j++)
+            {
+                for (int i = xMin; i <= xMax; i++)
+                {
+                    Points[index++] = new Point(i, j);
+                }
+            }
+        }
 	}
 }
