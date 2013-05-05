@@ -22,7 +22,6 @@ namespace Learnification
 		Vector2 rockPos = new Vector2(-16, -16);
 
 		Point enemyFrame = new Point(0, 0);
-		Point heroFrame = new Point(0, 0);
 
         Point frameSize = new Point(38, 41);
         Point sheetSize = new Point(4, 6);
@@ -76,7 +75,7 @@ namespace Learnification
 	        hero = new Hero
 	        {
 		        Sprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes"),
-		        IsRunning = 0,
+                IsRunning = 0,
 		        IsJumping = 0,
 		        IsDying = 0,
 		        JumpPower = 0.5f,
@@ -174,7 +173,7 @@ namespace Learnification
 			}
 			else if (collisionDetected())
 			{
-				killHero();
+				hero.Die();
 			}
 
             if (timeSinceLastFrame > millisecondsPerFrame)
@@ -183,15 +182,15 @@ namespace Learnification
 
 				if (hero.IsRunning == 1 || hero.JumpPower == 1.0f)
 				{
-					animateHeroLongJump();
+					hero.Run();
 				}
 				else if (hero.IsJumping == 1)
 				{
-					animateHeroShortJump();
+                    hero.ShortJump();
 				}
 				else
 				{
-					animateHeroIdle();
+					hero.Idle();
 				}
 	            
 				// Move enemy
@@ -215,7 +214,7 @@ namespace Learnification
 					
 					if (detectRockCollision())
 					{
-						killHero();
+						hero.Die();
 						rock.IsAirborn = false;
 						rockPos.X = -16;
 						rockPos.Y = -16;
@@ -235,13 +234,11 @@ namespace Learnification
             GraphicsDevice.Clear(Color.White);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
-            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(heroFrame.X * frameSize.X, heroFrame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
-			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
-			spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
-			spriteBatch.DrawString(font, "Enemy Health:" + enemy.Health + "%", new Vector2(20, 45), Color.Yellow);
-
-
+                spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
+                spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(hero.Frame.X * frameSize.X, hero.Frame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
+			    spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+			    spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
+			    spriteBatch.DrawString(font, "Enemy Health:" + enemy.Health + "%", new Vector2(20, 45), Color.Yellow);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -272,13 +269,6 @@ namespace Learnification
 			var yEquivalance = Math.Abs(Window.ClientBounds.Height - heroPos.Y - enemy.Size.Y) < 25;
 
 			return xEquivilance && yEquivalance;
-		}
-
-		private void killHero()
-		{
-			hero.IsDying = 1;
-			heroFrame.Y = 1;
-			heroFrame.X = 1;
 		}
 
 		private void killEnemy()
@@ -378,45 +368,6 @@ namespace Learnification
 				{
 					enemy.Direction = SpriteEffects.None;
 				}
-			}
-		}
-
-		private void animateHeroLongJump()
-		{
-			if (heroFrame.Y == 0)
-			{
-				heroFrame.Y = 1;
-			}
-			++heroFrame.X;
-
-			if (heroFrame.X >= sheetSize.X)
-			{
-				heroFrame.X = 0;
-				++heroFrame.Y;
-				if (heroFrame.Y >= 3)
-				{
-					heroFrame.Y = 1;
-				}
-			}
-		}
-
-		private void animateHeroShortJump()
-		{
-			heroFrame.Y = 1;
-			heroFrame.X = 1;
-		}
-
-		private void animateHeroIdle()
-		{
-			if (heroFrame.Y > 0)
-			{
-				heroFrame.Y = 0;
-			}
-			++heroFrame.X;
-
-			if (heroFrame.X >= sheetSize.X)
-			{
-				heroFrame.X = 0;
 			}
 		}
 

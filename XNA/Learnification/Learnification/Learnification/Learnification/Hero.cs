@@ -5,21 +5,54 @@ namespace Learnification
 {
 	class Hero : Animatible
 	{
-		public const float RunningSpeed = 3f;
+        public Hero()
+        {
+            FramePositions = new AnimatibleFramePositions[2];
 
-		//public Texture2D Sprite { get; set; }
-		public int IsRunning { get; set; }
+            //Running or Long Jumping
+            FramePositions[0] = new AnimatibleFramePositions();
+                FramePositions[0].Points = new Point[4];
+                FramePositions[0].Points[0] = new Point(0, 1);
+                FramePositions[0].Points[1] = new Point(1, 1);
+                FramePositions[0].Points[2] = new Point(2, 1);
+                FramePositions[0].Points[3] = new Point(3, 1);
+
+            //Idle
+            FramePositions[1] = new AnimatibleFramePositions();
+                FramePositions[1].Points = new Point[4];
+                FramePositions[1].Points[0] = new Point(0, 0);
+                FramePositions[1].Points[1] = new Point(1, 0);
+                FramePositions[1].Points[2] = new Point(2, 0);
+                FramePositions[1].Points[3] = new Point(3, 0);
+        }
+        
+        public float Speed = 3f;
+        public int IsRunning { get; set; }
 		public int IsJumping { get; set; }
 		public int IsDying { get; set; }
 		public float JumpPower { get; set; }
 		public Vector2 MaxRight { get; set; }
 		public SpriteEffects Direction { get; set; }
-		public Point Frame { get; set; }
-		public float Speed {
-			get
-			{
-				return RunningSpeed;
-			}
-		}
+        
+        public void ShortJump()
+        {
+            Frame = new Point(1, 1);
+        }
+
+        public void Run()
+        {
+            Animate(FramePositions[0]);   
+        }
+
+        public void Idle()
+        {
+            Animate(FramePositions[1]);
+        }
+
+        public void Die()
+        {
+            IsDying = 1;
+            Frame = new Point(1, 1);
+        }
 	}
 }

@@ -1,16 +1,19 @@
 ﻿namespace Learnification
 {
 	using Microsoft.Xna.Framework.Graphics;
+    using Microsoft.Xna.Framework;
 
-	public class Animatible
+	public abstract class Animatible
 	{
 		public Texture2D Sprite { get; set; }
 		public AnimatibleFramePositions[] FramePositions { get; set; }
+        public Point Frame { get; set; }
 
-		public void Animate(int index)
+		protected void Animate(AnimatibleFramePositions positions)
 		{
-			var framePosition = FramePositions[index];
-			
+            ++positions.Index;
+            positions.Index = positions.Index % positions.Points.Length;
+            Frame = positions.Points[positions.Index];
 		}
 	}
 }
