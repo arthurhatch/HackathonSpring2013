@@ -11,7 +11,7 @@ namespace Learnification
 
             //Running or Long Jumping
             FramePositions[0] = new AnimatibleFramePositions();
-                FramePositions[0].Points = new Point[4];
+            FramePositions[0].Points = new Point[4];
                 FramePositions[0].Points[0] = new Point(0, 1);
                 FramePositions[0].Points[1] = new Point(1, 1);
                 FramePositions[0].Points[2] = new Point(2, 1);
@@ -19,7 +19,7 @@ namespace Learnification
 
             //Idle
             FramePositions[1] = new AnimatibleFramePositions();
-                FramePositions[1].Points = new Point[4];
+            FramePositions[1].Points = new Point[4];
                 FramePositions[1].Points[0] = new Point(0, 0);
                 FramePositions[1].Points[1] = new Point(1, 0);
                 FramePositions[1].Points[2] = new Point(2, 0);

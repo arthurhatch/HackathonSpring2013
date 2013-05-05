@@ -21,8 +21,6 @@ namespace Learnification
 		Vector2 enemyPos = Vector2.Zero;
 		Vector2 rockPos = new Vector2(-16, -16);
 
-		Point enemyFrame = new Point(0, 0);
-
         Point frameSize = new Point(38, 41);
         Point sheetSize = new Point(4, 6);
 
@@ -155,15 +153,7 @@ namespace Learnification
 
 				if (collisionDetected())
 				{
-					if (enemy.Health - 12 <= 0)
-					{
-						enemy.Health = 0;
-					}
-					else
-					{
-						enemy.Health = enemy.Health - 12;
-					}
-					killEnemy();
+                    enemy.Die();
 				}
 			}
 
@@ -196,7 +186,8 @@ namespace Learnification
 				// Move enemy
 	            if (enemy.IsMoving == 1)
 	            {
-		            moveEnemy();
+                    enemy.Walk();
+                    moveEnemy();
 	            }
 	            else
 	            {
@@ -236,7 +227,7 @@ namespace Learnification
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
                 spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(hero.Frame.X * frameSize.X, hero.Frame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
-			    spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemyFrame.X * enemy.Size.X, enemyFrame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+			    spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemy.Frame.X * enemy.Size.X, enemy.Frame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
 			    spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
 			    spriteBatch.DrawString(font, "Enemy Health:" + enemy.Health + "%", new Vector2(20, 45), Color.Yellow);
             spriteBatch.End();
@@ -269,13 +260,6 @@ namespace Learnification
 			var yEquivalance = Math.Abs(Window.ClientBounds.Height - heroPos.Y - enemy.Size.Y) < 25;
 
 			return xEquivilance && yEquivalance;
-		}
-
-		private void killEnemy()
-		{
-			enemy.IsMoving = 0;
-			enemyFrame.X = 0;
-			enemyFrame.Y = 2;
 		}
 
 		private void reviveEnemy()
@@ -373,18 +357,7 @@ namespace Learnification
 
 		private void moveEnemy()
 		{
-			++enemyFrame.X;
-		    if (enemyFrame.X >= enemy.SheetSize.X)
-		    {
-			    enemyFrame.X = 0;
-			    ++enemyFrame.Y;
-			    if (enemyFrame.Y >= 2)
-			    {
-				    enemyFrame.Y = 0;
-			    }
-		    }
-
-		    if (enemy.Direction == SpriteEffects.None)
+			if (enemy.Direction == SpriteEffects.None)
 		    {
 				enemyPos.X += enemy.Speed;
 			    if (enemyPos.X > enemy.MaxRight.X)
