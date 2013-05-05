@@ -40,7 +40,7 @@ namespace Learnification
 
         public void Die()
         {
-            Health = (Health <= -12) ? 0 : Health - 12;
+            Health = (Health <= 12) ? 0 : Health - 12;
             IsMoving = 0;
             Frame = new Point(0, 2);
         }
