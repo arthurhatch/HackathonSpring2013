@@ -19,11 +19,7 @@ namespace Learnification
 
             //Idle
             FramePositions[1] = new AnimatibleFramePositions();
-            FramePositions[1].Points = new Point[4];
-                FramePositions[1].Points[0] = new Point(0, 0);
-                FramePositions[1].Points[1] = new Point(1, 0);
-                FramePositions[1].Points[2] = new Point(2, 0);
-                FramePositions[1].Points[3] = new Point(3, 0);
+            FramePositions[1].GeneratePoints(4, 1);
         }
         
         public float Speed = 3f;

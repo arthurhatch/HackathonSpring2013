@@ -6,5 +6,20 @@
 	{
 		public Point[] Points { get; set; }
 		public int Index { get; set; }
+
+        public void GeneratePoints(int x, int y)
+        {
+            var length = x * y;
+            Points = new Point[length];
+            var index = 0;
+
+            for (int j = 0; j < y; j++)
+            {
+                for (int i = 0; i < x; i++)
+                {
+                    Points[index++] = new Point(i, j);
+                }
+            }
+        }
 	}
 }
