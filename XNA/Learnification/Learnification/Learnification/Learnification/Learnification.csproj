@@ -120,6 +120,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animatible.cs" />
+    <Compile Include="AnimatibleFramePositions.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="Hero.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
