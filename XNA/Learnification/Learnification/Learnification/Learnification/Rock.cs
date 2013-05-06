@@ -3,9 +3,17 @@ using Microsoft.Xna.Framework;
 
 namespace Learnification
 {
-	class Rock
+	public class Rock
 	{
-		public Texture2D Sprite { get; set; }
+        public Rock()
+        {
+            Size = new Point(16, 16);
+			Direction = SpriteEffects.None;
+			IsAirborn = false;
+            IsFalling = false;
+        }
+        
+        public Texture2D Sprite { get; set; }
 		public Point Size { get; set; }
 		public SpriteEffects Direction { get; set; }
 		public bool IsAirborn { get; set; }

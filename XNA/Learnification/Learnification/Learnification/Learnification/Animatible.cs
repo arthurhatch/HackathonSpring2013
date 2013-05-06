@@ -6,14 +6,14 @@
 	public abstract class Animatible
 	{
 		public Texture2D Sprite { get; set; }
-		public AnimatibleFramePositions[] FramePositions { get; set; }
+        public ActionSequence[] ActionSequences { get; set; }
         public Point Frame { get; set; }
 
-		protected void Animate(AnimatibleFramePositions positions)
+        protected void Animate(ActionSequence actionSequence)
 		{
-            ++positions.Index;
-            positions.Index = positions.Index % positions.Points.Length;
-            Frame = positions.Points[positions.Index];
+            ++actionSequence.Index;
+            actionSequence.Index = actionSequence.Index % actionSequence.Frames.Length;
+            Frame = actionSequence.Frames[actionSequence.Index];
 		}
 	}
 }

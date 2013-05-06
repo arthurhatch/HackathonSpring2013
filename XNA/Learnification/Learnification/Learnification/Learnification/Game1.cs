@@ -55,40 +55,14 @@ namespace Learnification
             // Load the images for our game into our ContentManager / Memory
             background = Content.Load<Texture2D>(@"Images/background2");
 
-			enemy = new Enemy
-			{
-				Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield"),
-				Direction = SpriteEffects.None,
-				MaxRight = Vector2.Zero,
-				Size = new Point(45, 52),
-				SheetSize = new Point(4, 3),
-				IsMoving = 1,
-				DeadCount = 0,
-				Health = 100,
-				Speed = 5f,
-				MaxSpeed = 20f,
-				ChaseSmart = false,
-			};
+			enemy = new Enemy();
+			enemy.Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield");
 
-	        hero = new Hero
-	        {
-		        Sprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes"),
-                IsRunning = 0,
-		        IsJumping = 0,
-		        IsDying = 0,
-		        JumpPower = 0.5f,
-		        MaxRight = Vector2.Zero,
-				Direction = SpriteEffects.None,
-	        };
+	        hero = new Hero();
+	        hero.Sprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes");
 
-	        rock = new Rock
-	        {
-		        Sprite = Content.Load<Texture2D>(@"Images/rock"),
-				Size = new Point(16, 16),
-				Direction = SpriteEffects.None,
-				IsAirborn = false,
-				IsFalling = false,
-	        };
+            rock = new Rock();
+	        rock.Sprite = Content.Load<Texture2D>(@"Images/rock");
 
 			font = Content.Load<SpriteFont>("gameFont");
 
@@ -178,10 +152,10 @@ namespace Learnification
 				{
                     hero.ShortJump();
 				}
-				else
-				{
-					hero.Idle();
-				}
+                else
+                {
+                    hero.Idle();
+                }
 	            
 				// Move enemy
 	            if (enemy.IsMoving == 1)
@@ -194,9 +168,10 @@ namespace Learnification
 		            enemy.DeadCount++;
 	            }
 
-				if (enemy.DeadCount > 10)
+                if (enemy.DeadCount > 10 && enemy.Lives > 0)
 				{
-					reviveEnemy();
+                    enemy.Revive();
+                    throwRock();
 				}
 
 				if (rock.IsAirborn)
@@ -222,19 +197,30 @@ namespace Learnification
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                spriteBatch.Draw(background, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
-                spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(hero.Frame.X * frameSize.X, hero.Frame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
-			    spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemy.Frame.X * enemy.Size.X, enemy.Frame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
-			    spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
-			    spriteBatch.DrawString(font, "Enemy Health:" + enemy.Health + "%", new Vector2(20, 45), Color.Yellow);
+            
+            spriteBatch.Draw(background, new Rectangle(0, 35, Window.ClientBounds.Width, Window.ClientBounds.Height - 35), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
+            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(hero.Frame.X * frameSize.X, hero.Frame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
+			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemy.Frame.X * enemy.Size.X, enemy.Frame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+            spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
+            spriteBatch.DrawString(font, GenerateMessage(), new Vector2(5, 5), Color.White);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
+        private string GenerateMessage()
+        {
+            if (hero.Lives == 0) return "Game Over (hit escape)";
+            if (enemy.Lives == 0) return "You Win! (hit escape)";
+
+            return "Hero Lives: " + hero.Lives 
+                + "                                                                 " 
+                + "Enemy Lives: " + enemy.Lives;
+        }
 		private bool detectRockCollision()
 		{
 			var xEquivilance = Math.Abs(heroPos.X - rockPos.X) < 20;
@@ -262,37 +248,16 @@ namespace Learnification
 			return xEquivilance && yEquivalance;
 		}
 
-		private void reviveEnemy()
-		{
-			enemy.IsMoving = 1;
-			enemy.DeadCount = 0;
-
-			if (enemy.Speed <= enemy.MaxSpeed)
-			{
-				enemy.Speed += 5;
-			}
-			else
-			{
-				enemy.ChaseSmart = true;
-			}
-
-			throwRock();
-		}
-
 		private void animateHeroDeath()
 		{
 			heroPos.Y = (dieFrame <= 15) ? heroPos.Y + -1 * hero.Speed : heroPos.Y + hero.Speed;
 
-			dieFrame++;
-
-			if (dieFrame > 90)
+			if (++dieFrame > 90 && hero.Lives > 0)
 			{
-				hero.IsJumping = 0;
-				hero.IsDying = 0;
-				hero.JumpPower = 0.5f;
 				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
+                hero.Revive();
 				
-				jumpFrame = 0;
+                jumpFrame = 0;
 				dieFrame = 0;
 			}
 		}
@@ -313,7 +278,7 @@ namespace Learnification
 
 		    if (!rock.IsFalling)
 		    {
-				rock.IsFalling = !rock.IsFalling && rockPos.Y < 370;
+				rock.IsFalling = rockPos.Y < 370;
 		    }
 
 		    rock.IsAirborn = rockPos.Y < Window.ClientBounds.Height;
