@@ -171,7 +171,8 @@ namespace Learnification
                 if (enemy.DeadCount > 10 && enemy.Lives > 0)
 				{
                     enemy.Revive();
-                    throwRock();
+                    if (enemy.LobRocksOnRevive)
+                        throwRock();
 				}
 
 				if (rock.IsAirborn)
@@ -282,6 +283,9 @@ namespace Learnification
 		    }
 
 		    rock.IsAirborn = rockPos.Y < Window.ClientBounds.Height;
+            
+            if (enemy.LobRocksOnRockLands && !rock.IsAirborn)
+                throwRock();
 		}
 
 		private void animateHeroJump()
@@ -296,12 +300,15 @@ namespace Learnification
 
 			if (jumpFrame > 60)
 			{
-				jumpFrame = 0;
+                jumpFrame = 0;
 				hero.IsJumping = 0;
 				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
 				hero.JumpPower = 0.5f;
 
 				setEnemyDirection();
+
+                if (enemy.LobRocksOnHeroLands && !rock.IsAirborn && enemy.Lives > 0)
+                    throwRock();
 			}
 		}
 

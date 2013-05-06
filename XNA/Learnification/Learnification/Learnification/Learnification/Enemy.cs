@@ -17,8 +17,7 @@ namespace Learnification
 			SheetSize = new Point(4, 3);
 			IsMoving = 1;
 			Lives = 9;
-			Speed = 5f;
-			MaxSpeed = 20f;
+			Speed = 9f;
 			ChaseSmart = false;
         }
         
@@ -30,8 +29,10 @@ namespace Learnification
 		public int DeadCount { get; set; }
 		public int Lives { get; set; }
 		public float Speed { get; set; }
-		public float MaxSpeed { get; set; }
 		public bool ChaseSmart { get; set; }
+        public bool LobRocksOnRevive { get; set; }
+        public bool LobRocksOnHeroLands { get; set; }
+        public bool LobRocksOnRockLands { get; set; }
 
         public void Walk()
         {
@@ -49,14 +50,26 @@ namespace Learnification
         {
             IsMoving = 1;
             DeadCount = 0;
+            Speed += 2;
 
-            if (Speed <= MaxSpeed)
+            if (Lives == 7)
             {
-                Speed += 5;
+                LobRocksOnRevive = true;
             }
-            else
+
+            if (Lives == 5)
             {
                 ChaseSmart = true;
+            }
+
+            if(Lives == 3)
+            {
+                LobRocksOnHeroLands = true;
+            }
+
+            if (Lives == 1)
+            {
+                LobRocksOnRockLands = true;
             }
         }
 	}
