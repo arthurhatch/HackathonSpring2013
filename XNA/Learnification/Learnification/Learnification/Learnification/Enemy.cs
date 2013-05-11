@@ -32,7 +32,8 @@ namespace Learnification
 		public bool ChaseSmart { get; set; }
         public bool LobRocksOnRevive { get; set; }
         public bool LobRocksOnHeroLands { get; set; }
-        public bool LobRocksOnRockLands { get; set; }
+        public bool LobRocksOnHeroJumps { get; set; }
+        public Vector2 Position;
 
         public void Walk()
         {
@@ -69,7 +70,7 @@ namespace Learnification
 
             if (Lives == 1)
             {
-                LobRocksOnRockLands = true;
+                LobRocksOnHeroJumps = true;
             }
         }
 	}

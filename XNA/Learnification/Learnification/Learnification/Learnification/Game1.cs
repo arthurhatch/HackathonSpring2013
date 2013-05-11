@@ -7,8 +7,9 @@ namespace Learnification
 {
     public class Game1 : Game
     {
-        // BEGIN GAME LOL
         GraphicsDeviceManager graphics;
+
+        GameTime GameTime;
 
         SpriteBatch spriteBatch;
 	    Texture2D background;
@@ -17,25 +18,16 @@ namespace Learnification
 	    Hero hero;
 		Rock rock;
 
-        Vector2 heroPos = Vector2.Zero;
-		Vector2 enemyPos = Vector2.Zero;
-		Vector2 rockPos = new Vector2(-16, -16);
+        Vector2 rockPos;
 
         Point frameSize = new Point(38, 41);
         Point sheetSize = new Point(4, 6);
 
 		SpriteFont font;
 
-		int jumpFrame;
-		int dieFrame;
-	    float heightIncrement;
-        int timeSinceLastFrame;
+		int timeSinceLastFrame;
 
         const int millisecondsPerFrame = 125;
-	   
-		enum Direction { Left = -1, Right = 1 }
-
-		Direction direction = Direction.Right;
 
         public Game1()
         {
@@ -54,25 +46,26 @@ namespace Learnification
 
             // Load the images for our game into our ContentManager / Memory
             background = Content.Load<Texture2D>(@"Images/background2");
+            font = Content.Load<SpriteFont>("gameFont");
+            enemy = new Enemy 
+            { 
+                Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield")
+            };
+	        hero = new Hero 
+            { 
+                Sprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes"), 
+                Position = new Vector2(0, (Window.ClientBounds.Height - frameSize.Y)),
+                MaxRight = Window.ClientBounds.Width - frameSize.X
+            };
+            rock = new Rock 
+            { 
+                Sprite = Content.Load<Texture2D>(@"Images/rock"),
+                Position = new Vector2(-16, -16)
+            };
 
-			enemy = new Enemy();
-			enemy.Sprite = Content.Load<Texture2D>(@"Images/Sprites/garfield");
-
-	        hero = new Hero();
-	        hero.Sprite = Content.Load<Texture2D>(@"Images/Sprites/hobbes");
-
-            rock = new Rock();
-	        rock.Sprite = Content.Load<Texture2D>(@"Images/rock");
-
-			font = Content.Load<SpriteFont>("gameFont");
-
-            // Set up some defaults needed for default sprite locations / movement boundaries
-            heroPos = new Vector2(0, (Window.ClientBounds.Height - frameSize.Y));
-            hero.MaxRight = new Vector2((Window.ClientBounds.Width - frameSize.X), 0);
-
-			// Set up enemy defaults
-			enemyPos = new Vector2((Window.ClientBounds.Width / 2), (Window.ClientBounds.Height - enemy.Size.Y));
-			enemy.MaxRight = new Vector2((Window.ClientBounds.Width - enemy.Size.X), 0);
+            enemy.Position = new Vector2((Window.ClientBounds.Width / 2), (Window.ClientBounds.Height - enemy.Size.Y));
+			rockPos = rock.Position;
+            enemy.MaxRight = new Vector2((Window.ClientBounds.Width - enemy.Size.X), 0);
         }
 
         /// <summary>
@@ -82,48 +75,43 @@ namespace Learnification
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            this.GameTime = gameTime;
             timeSinceLastFrame += gameTime.ElapsedGameTime.Milliseconds;
             hero.IsRunning = 0;
 
             // Allows the game to exit
             var keyboardState = Keyboard.GetState();
             if (keyboardState.IsKeyDown(Keys.Escape))
+            {
                 this.Exit();
+            }
 
             // Logic for movement
 			if (keyboardState.IsKeyDown(Keys.Left) && hero.IsJumping == 0 && hero.IsDying == 0)
             {
-                hero.IsRunning = 1;
-				hero.IsJumping = 0;
-	            direction = Direction.Left;
-                hero.Direction = SpriteEffects.FlipHorizontally;
-                heroPos.X -= hero.Speed;
-                if (heroPos.X < 0)
-                    heroPos.X = 0;
+                hero.SetRunState(Direction.Left);
             }
 
 			if (keyboardState.IsKeyDown(Keys.Right) && hero.IsJumping == 0 && hero.IsDying == 0)
             {
-                hero.IsRunning = 1;
-				hero.IsJumping = 0;
-				direction = Direction.Right;
-                hero.Direction = SpriteEffects.None;
-                heroPos.X += hero.Speed;
-                if (heroPos.X > hero.MaxRight.X)
-                    heroPos.X = hero.MaxRight.X;
+                hero.SetRunState(Direction.Right);
             }
 
 			if (keyboardState.IsKeyDown(Keys.A) && hero.IsJumping == 0 && hero.IsDying == 0)
 			{
-				hero.IsJumping = 1;
-				jumpFrame = 1;
-				hero.JumpPower = hero.IsRunning == 1 ? 1.0f : 0.6f;
-				hero.Direction = (int)direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                hero.SetJumpState();
 			}
 
 			if (hero.IsJumping == 1)
 			{
-				animateHeroJump();
+                hero.AnimateJump(Window.ClientBounds.Height - frameSize.Y);
+
+                if (hero.IsJumping == 0)
+                {
+                    setEnemyDirection();
+                    if (enemy.LobRocksOnHeroLands && !rock.IsAirborn && enemy.Lives > 0)
+                        throwRock();
+                }
 
 				if (collisionDetected())
 				{
@@ -133,7 +121,7 @@ namespace Learnification
 
 			if (hero.IsDying == 1)
 			{
-				animateHeroDeath();
+                hero.AnimateDeath(Window.ClientBounds.Height - frameSize.Y);
 			}
 			else if (collisionDetected())
 			{
@@ -203,8 +191,8 @@ namespace Learnification
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             
             spriteBatch.Draw(background, new Rectangle(0, 35, Window.ClientBounds.Width, Window.ClientBounds.Height - 35), null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0);
-            spriteBatch.Draw(hero.Sprite, heroPos, new Rectangle(hero.Frame.X * frameSize.X, hero.Frame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.Direction, 1);
-			spriteBatch.Draw(enemy.Sprite, enemyPos, new Rectangle(enemy.Frame.X * enemy.Size.X, enemy.Frame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
+            spriteBatch.Draw(hero.Sprite, hero.Position, new Rectangle(hero.Frame.X * frameSize.X, hero.Frame.Y * frameSize.Y, frameSize.X, frameSize.Y), Color.White, 0, Vector2.Zero, 1, hero.SpriteEffect, 1);
+			spriteBatch.Draw(enemy.Sprite, enemy.Position, new Rectangle(enemy.Frame.X * enemy.Size.X, enemy.Frame.Y * enemy.Size.Y, enemy.Size.X, enemy.Size.Y), Color.White, 0, Vector2.Zero, 1, enemy.Direction, 1);
             spriteBatch.Draw(rock.Sprite, rockPos, new Rectangle(0, 0, rock.Size.X, rock.Size.Y), Color.White, 0, Vector2.Zero, 1, rock.Direction, 1);
             spriteBatch.DrawString(font, GenerateMessage(), new Vector2(5, 5), Color.White);
             
@@ -218,14 +206,15 @@ namespace Learnification
             if (hero.Lives == 0) return "Game Over (hit escape)";
             if (enemy.Lives == 0) return "You Win! (hit escape)";
 
-            return "Hero Lives: " + hero.Lives 
-                + "                                                                 " 
-                + "Enemy Lives: " + enemy.Lives;
+            return "Hero Lives: " + hero.Lives
+                + "                     Enemy Lives: " + enemy.Lives
+                + "                     Game Time: " + this.GameTime.TotalGameTime.Seconds;
         }
+
 		private bool detectRockCollision()
 		{
-			var xEquivilance = Math.Abs(heroPos.X - rockPos.X) < 20;
-			var yEquivalance = Math.Abs(heroPos.Y - rockPos.Y) < 20;
+			var xEquivilance = Math.Abs(hero.Position.X - rockPos.X) < 20;
+			var yEquivalance = Math.Abs(hero.Position.Y - rockPos.Y) < 20;
 
 			return xEquivilance && yEquivalance;
 		}
@@ -237,37 +226,23 @@ namespace Learnification
 				return false;
 			}
 
-			var xEquivilance = Math.Abs(heroPos.X - enemyPos.X) < 10;
+			var xEquivilance = Math.Abs(hero.Position.X - enemy.Position.X) < 10;
 
 			if (hero.IsJumping == 0)
 			{
 				return xEquivilance;
 			}
 
-			var yEquivalance = Math.Abs(Window.ClientBounds.Height - heroPos.Y - enemy.Size.Y) < 25;
+			var yEquivalance = Math.Abs(Window.ClientBounds.Height - hero.Position.Y - enemy.Size.Y) < 25;
 
 			return xEquivilance && yEquivalance;
 		}
 
-		private void animateHeroDeath()
-		{
-			heroPos.Y = (dieFrame <= 15) ? heroPos.Y + -1 * hero.Speed : heroPos.Y + hero.Speed;
-
-			if (++dieFrame > 90 && hero.Lives > 0)
-			{
-				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
-                hero.Revive();
-				
-                jumpFrame = 0;
-				dieFrame = 0;
-			}
-		}
-
 		private void throwRock()
 		{
-			rockPos.X = enemyPos.X;
-			rockPos.Y = enemyPos.Y;
-			rock.ThrowMultiplier = (enemyPos.X - heroPos.X > 0) ? -1 : 1;
+			rockPos.X = enemy.Position.X;
+			rockPos.Y = enemy.Position.Y;
+			rock.ThrowMultiplier = (enemy.Position.X - hero.Position.X > 0) ? -1 : 1;
 			rock.IsAirborn = true;
 			rock.IsFalling = false;
 		}
@@ -284,43 +259,19 @@ namespace Learnification
 
 		    rock.IsAirborn = rockPos.Y < Window.ClientBounds.Height;
             
-            if (enemy.LobRocksOnRockLands && !rock.IsAirborn)
+            if (enemy.LobRocksOnHeroJumps && hero.IsJumping == 1 && !rock.IsAirborn)
                 throwRock();
-		}
-
-		private void animateHeroJump()
-		{
-			heroPos.X += (int)direction * hero.Speed * hero.JumpPower;
-
-			heightIncrement = (float)(Math.Abs(30 - jumpFrame) / 18.0 * hero.Speed) * hero.JumpPower;
-
-			heroPos.Y = (jumpFrame <= 30) ? heroPos.Y + -1 * heightIncrement : heroPos.Y + heightIncrement;
-
-			jumpFrame++;
-
-			if (jumpFrame > 60)
-			{
-                jumpFrame = 0;
-				hero.IsJumping = 0;
-				heroPos.Y = Window.ClientBounds.Height - frameSize.Y;
-				hero.JumpPower = 0.5f;
-
-				setEnemyDirection();
-
-                if (enemy.LobRocksOnHeroLands && !rock.IsAirborn && enemy.Lives > 0)
-                    throwRock();
-			}
 		}
 
 		private void setEnemyDirection()
 		{
 			if (enemy.ChaseSmart)
 			{
-				if (enemy.Direction == SpriteEffects.None && enemyPos.X - heroPos.X > 0)
+				if (enemy.Direction == SpriteEffects.None && enemy.Position.X - hero.Position.X > 0)
 				{
 					enemy.Direction = SpriteEffects.FlipHorizontally;
 				}
-				else if (enemy.Direction == SpriteEffects.FlipHorizontally && enemyPos.X - heroPos.X < 0)
+				else if (enemy.Direction == SpriteEffects.FlipHorizontally && enemy.Position.X - hero.Position.X < 0)
 				{
 					enemy.Direction = SpriteEffects.None;
 				}
@@ -331,19 +282,19 @@ namespace Learnification
 		{
 			if (enemy.Direction == SpriteEffects.None)
 		    {
-				enemyPos.X += enemy.Speed;
-			    if (enemyPos.X > enemy.MaxRight.X)
+				enemy.Position.X += enemy.Speed;
+			    if (enemy.Position.X > enemy.MaxRight.X)
 			    {
-				    enemyPos.X = enemy.MaxRight.X;
+				    enemy.Position.X = enemy.MaxRight.X;
 				    enemy.Direction = SpriteEffects.FlipHorizontally;
 			    }
 		    }
 		    else
 		    {
-				enemyPos.X -= enemy.Speed;
-			    if (enemyPos.X < 0)
+				enemy.Position.X -= enemy.Speed;
+			    if (enemy.Position.X < 0)
 			    {
-				    enemyPos.X = 0;
+				    enemy.Position.X = 0;
 				    enemy.Direction = SpriteEffects.None;
 			    }
 		    }

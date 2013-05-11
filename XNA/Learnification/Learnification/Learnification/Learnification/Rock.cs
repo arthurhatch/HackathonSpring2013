@@ -19,5 +19,6 @@ namespace Learnification
 		public bool IsAirborn { get; set; }
 		public int ThrowMultiplier { get; set; }
 		public bool IsFalling { get; set; }
-	}
+        public Vector2 Position { get; set; }
+    }
 }
